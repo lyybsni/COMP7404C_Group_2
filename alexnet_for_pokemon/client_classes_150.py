@@ -20,6 +20,10 @@ gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
+# Configuration
+dataset_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/dataset'
+checkpoint_path = 'training/cp.ckpt'
+checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create image path and labels and write them into the .csv file; root: dataset root directory,
 # filename:csv name, name2label:class coding table. 
@@ -117,7 +121,7 @@ def preprocess(image_path, label):
 
 
 # Upload the self-defined datasets
-images, labels, table = load_pokemon('/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/dataset', 'train')
+images, labels, table = load_pokemon(dataset_path, 'train')
 # Print them if necessary
 # -print('images', len(images), images)
 # -print('labels', len(labels), labels)
@@ -131,6 +135,13 @@ num_classes = 150
 
 model = AlexNet((227, 227, 3), num_classes)
 
+# EDITED BY LI YUYANG
+try:
+    model.load_weights(checkpoint_path)
+    print("model loaded")
+finally:
+    print("model ready")
+
 model.summary()
 
 # Train the model: compute gradients and update network parameters
@@ -138,28 +149,38 @@ optimizer = optimizers.SGD(lr=0.01)
 acc_meter = metrics.Accuracy()
 x_step = []
 y_accuracy = []
-# Input the batch for the training
-for step, (x, y) in enumerate(db):
-    # Build the gradient records
-    with tf.GradientTape() as tape:
-        # Flatten the input such as [b,28,28]->[b,784]
-        x = tf.reshape(x, (-1, 227, 227, 3))
-        output = model(x)
-        y_onehot = tf.one_hot(y, depth=150)
-        loss = tf.square(output - y_onehot)
-        loss = tf.reduce_sum(loss) / 32
-        # Compute the gradients of each parameter
-        grads = tape.gradient(loss, model.trainable_variables)
-        # Update network parameters
-        optimizer.apply_gradients(zip(grads, model.trainable_variables))
-        # Compare the predicted value and labels and related precision
-        acc_meter.update_state(tf.argmax(output, axis=1), y)
-        # Print the results per 200 steps
-    if step % 10 == 0:
-        print('Step', step, ': Loss is: ', float(loss), ' Accuracy: ', acc_meter.result().numpy())
-        x_step.append(step)
-        y_accuracy.append(acc_meter.result().numpy())
-        acc_meter.reset_states()
+
+def train():
+    # Input the batch for the training
+    for step, (x, y) in enumerate(db):
+        # Build the gradient records
+        with tf.GradientTape() as tape:
+            # Flatten the input such as [b,28,28]->[b,784]
+            x = tf.reshape(x, (-1, 227, 227, 3))
+            output = model(x)
+            y_onehot = tf.one_hot(y, depth=150)
+            loss = tf.square(output - y_onehot)
+            loss = tf.reduce_sum(loss) / 32
+            # Compute the gradients of each parameter
+            grads = tape.gradient(loss, model.trainable_variables)
+            # Update network parameters
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
+            # Compare the predicted value and labels and related precision
+            acc_meter.update_state(tf.argmax(output, axis=1), y)
+            # Print the results per 200 steps
+        if step % 50 == 0:
+            print('Step', step, ': Loss is: ', float(loss), ' Accuracy: ', acc_meter.result().numpy())
+            x_step.append(step)
+            y_accuracy.append(acc_meter.result().numpy())
+            acc_meter.reset_states()
+
+            # EDITED BY LI YUYANG
+            # save the model to the file
+            tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True, verbose=1)
+            print("Model saved")
+
+# Start to train the model
+train()
 
 # Visualize the result with matplolib
 plt.plot(x_step, y_accuracy, label="training")
