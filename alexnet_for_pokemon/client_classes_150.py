@@ -27,7 +27,7 @@ dataset_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Proj
 checkpoint_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/training/cp.ckpt'
 checkpoint_dir = os.path.dirname(checkpoint_path)
 table_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/AlexNet_TensorFlow2.0-2.2/training/label.csv'
-tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True, verbose=1)
+# tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True, verbose=1)
 
 # Upload the self-defined datasets
 images, labels, table = load_pokemon(dataset_path, 'train')
@@ -51,18 +51,18 @@ db = db.shuffle(1000).map(preprocess).batch(32).repeat(20)
 # Set the global constant as 150
 num_classes = 150
 
-model = AlexNet((227, 227, 3), num_classes)
-
 # EDITED BY LI YUYANG
 try:
-    model.load_weights(checkpoint_path)
+    # model.load_weights(checkpoint_path)
+    model = tf.saved_model.load('saved_model/my_model')
     print("model loaded")
 except ValueError:
+    model = AlexNet((227, 227, 3), num_classes)
     print("No previous model trained. Training.")
 finally:
     print("model ready")
 
-model.summary()
+# model.summary()
 
 # Train the model: compute gradients and update network parameters
 optimizer = optimizers.SGD(lr=0.01)
@@ -97,8 +97,8 @@ def train():
 
             # EDITED BY LI YUYANG
             # save the model to the file
-            model.save_weights(checkpoint_path)
-            model.save('saved_model/my_model')
+            tf.saved_model.save(model, checkpoint_path)
+            # model.save('saved_model/my_model')
             print("Model saved")
 
 

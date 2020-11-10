@@ -28,10 +28,11 @@ print(label_names)
 
 num_classes = 150
 
-model = AlexNet((227, 227, 3), num_classes)
-model.load_weights(checkpoint_path)
+# model = AlexNet((227, 227, 3), num_classes)
+# model.load_weights(checkpoint_path)
+# model = tf.keras.models.load_model('saved_model/my_model')
 
-#model = tf.keras.models.load_model('saved_model/my_model')
+model = tf.saved_model.load('saved_model/my_model')
 
 def output(image_path):
     x, _ = preprocess(image_path, 1)
