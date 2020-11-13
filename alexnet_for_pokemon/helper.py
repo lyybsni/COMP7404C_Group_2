@@ -5,6 +5,7 @@ import random
 
 import tensorflow as tf
 
+
 # Create image path and labels and write them into the .csv file; root: dataset root directory,
 # filename:csv name, name2label:class coding table.
 def load_csv(root, filename, name2label):

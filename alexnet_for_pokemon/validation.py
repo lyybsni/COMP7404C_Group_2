@@ -5,14 +5,14 @@ This file is added to test the functionality of alexnet for pokemon
 import tensorflow as tf
 import os
 import csv
-from alexnet import AlexNet
 
 from helper import load_pokemon, preprocess
 
 dataset_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/dataset'
 checkpoint_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/training/cp.ckpt'
 checkpoint_dir = os.path.dirname(checkpoint_path)
-table_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/AlexNet_TensorFlow2.0-2.2/training/label.csv'
+table_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/AlexNet_TensorFlow2.0-2.2/training' \
+             '/label.csv '
 
 # select an image
 image_path = input("Please input the image path")
@@ -34,12 +34,14 @@ num_classes = 150
 
 model = tf.saved_model.load('saved_model/my_model')
 
-def output(image_path):
-    x, _ = preprocess(image_path, 1)
-    x = tf.reshape(x, (-1, 227, 227, 3))
-    output = model(x)
 
-def eval():
+def predict(path, model_):
+    x, _ = preprocess(path, 1)
+    x = tf.reshape(x, (-1, 227, 227, 3))
+    return model_(x)
+
+
+def myeval():
     images, labels, _ = load_pokemon(dataset_path, 'test')
     db = tf.data.Dataset.from_tensor_slices((images, labels))
     db = db.shuffle(1000).map(preprocess).batch(32).repeat(20)
@@ -57,4 +59,5 @@ def eval():
             print('Step', step, ' Accuracy: ', acc_meter.result().numpy())
             acc_meter.reset_states()
 
-eval()
+
+myeval()
