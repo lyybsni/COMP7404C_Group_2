@@ -160,17 +160,13 @@ class ClassifyWindow(tkinter.Frame):
         target = tkinter.Label(frame, text=self.target)
         target.grid(row=4, column=0, sticky=tkinter.W)
 
-        """
-        # get the other five image data, dummy now
-        results = []
-        classtexts = []         # class label with probability
+        self.targetImages, self.targetTexts = None  # dummy for classifiers
         for i in range(5):
-            pred = tkinter.Label(frame, image=results[i])
+            pred = tkinter.Label(frame, image=self.targetImages[i])
             pred.grid(row=i, column=1, sticky=tkinter.NSEW)
 
-            classtext = tkinter.Label(frame, text=classtexts[i])
+            classtext = tkinter.Label(frame, text=self.targetTexts[i])
             classtext.grid(row=i, column=2, anchor=tkinter.W)
-        """
 
         frame.grid(row=0, column=0, sticky=tkinter.NSEW)
         frame.columnconfigure(0, weight=300)
@@ -185,8 +181,17 @@ class ClassifyWindow(tkinter.Frame):
         newwindow.geometry("{0}x{1}+{2}+{3}".format(1800, 800, 0, 50))
 
 
-    # def run(self):
-
+def predict(picturedir, mode=None):
+    if mode is None:
+        print("No module is loaded, please check.")
+    elif mode == "Pokemon":
+        print("This is a dummy predict module.")
+        return None, None
+    elif mode == "Nminst":
+        print("This is another dummy predict module.")
+        return None, None
+    else:
+        print("No such module designed in this program.")
 
 def createSession():
     # similar serves as Setup function
