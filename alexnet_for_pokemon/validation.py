@@ -14,26 +14,6 @@ checkpoint_dir = os.path.dirname(checkpoint_path)
 table_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/AlexNet_TensorFlow2.0-2.2/training' \
              '/label.csv '
 
-# select an image
-image_path = input("Please input the image path")
-
-label_names = {}
-with open(table_path, mode='r', newline='') as f:
-    reader = csv.reader(f)
-    for row in reader:
-        label_names[int(row[0])] = row[1]
-    f.close()
-
-print(label_names)
-
-num_classes = 150
-
-# model = AlexNet((227, 227, 3), num_classes)
-# model.load_weights(checkpoint_path)
-# model = tf.keras.models.load_model('saved_model/my_model')
-
-model = tf.saved_model.load('saved_model/my_model')
-
 
 def predict(path, model_):
     x, _ = preprocess(path, 1)
@@ -42,6 +22,7 @@ def predict(path, model_):
 
 
 def myeval():
+    model = tf.saved_model.load('saved_model/my_model')
     images, labels, _ = load_pokemon(dataset_path, 'test')
     db = tf.data.Dataset.from_tensor_slices((images, labels))
     db = db.shuffle(1000).map(preprocess).batch(32).repeat(20)
@@ -60,4 +41,4 @@ def myeval():
             acc_meter.reset_states()
 
 
-myeval()
+# myeval()

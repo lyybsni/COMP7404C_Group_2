@@ -4,11 +4,14 @@ import tkinter.filedialog
 import tkinter.messagebox
 
 import tensorflow as tf
+import numpy as np
 from PIL import ImageTk, Image
 
 import helper
 import validation
 
+dataset_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/dataset'
+checkpoint_path = '/Users/richardli/Documents/Academia/HKU-2020/COMP7404/Group_Project/training/cp.ckpt'
 
 class MainWindow(tkinter.Frame):
     def __init__(self, parent):
@@ -164,18 +167,20 @@ class ClassifyWindow(tkinter.Frame):
         target = tkinter.Label(frame, text=self.target)
         target.grid(row=4, column=0, sticky=tkinter.W)
 
-        self.targetImages, self.targetTexts = [], []  # dummy for classifiers
+        self.targetImages, self.targetTexts = predict(self.dir_, self.module)  # dummy for classifiers
+
+        print(self.targetTexts)
         for i in range(5):
-            pred = tkinter.Label(frame, image=self.targetImages[i])
-            pred.grid(row=i, column=1, sticky=tkinter.NSEW)
+            # pred = tkinter.Label(frame, image=self.targetImages[i])
+            # pred.grid(row=i, column=1, sticky=tkinter.NSEW)
 
             class_text = tkinter.Label(frame, text=self.targetTexts[i])
-            class_text.grid(row=i, column=2, anchor=tkinter.W)
+            class_text.grid(row=i, column=2, sticky=tkinter.W)
 
         frame.grid(row=0, column=0, sticky=tkinter.NSEW)
         frame.columnconfigure(0, weight=300)
-        frame.columnconfigure(1, weight=300)
-        frame.columnconfigure(2, weight=300)
+        frame.columnconfigure(1, weight=3000)
+        frame.columnconfigure(2, weight=3000)
         frame.rowconfigure(0, weight=300)
         frame.rowconfigure(1, weight=300)
         frame.rowconfigure(2, weight=300)
@@ -189,10 +194,27 @@ def predict(picture_dir, mode=None):
     if mode is None:
         print("No module is loaded, please check.")
     elif mode == "Pokemon":
-        print("This is a dummy predict module.")
-        model = tf.saved_model.load('saved_model/my_model')
-        output = validation.predict(model, picture_dir)
-        return None, None
+
+        model = tf.saved_model.load(checkpoint_path)
+        _, _, name2label = helper.load_pokemon(dataset_path, None)
+
+        label2name = {}
+        for key in name2label:
+            temp = name2label[key]
+            label2name[temp] = key
+
+        print(label2name)
+
+        res = validation.predict(picture_dir, model).numpy()[0]
+
+        idx = np.argpartition(res, -5)[-5:]  # Indices not sorted
+        lst = idx[np.argsort(res[idx])][::-1]  # Indices sorted by value from largest to smalles
+
+        text = []
+        for i in lst:
+            text = text + [(label2name[i] + " " + str(res[i]))]
+        # print(label2name.get(np.asarray(lst)))
+        return None, text
     elif mode == "Nminst":
         print("This is another dummy predict module.")
         return None, None

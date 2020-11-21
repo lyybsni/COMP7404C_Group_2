@@ -54,7 +54,7 @@ num_classes = 150
 # EDITED BY LI YUYANG
 try:
     # model.load_weights(checkpoint_path)
-    model = tf.saved_model.load('saved_model/my_model')
+    model = tf.saved_model.load(checkpoint_path)
     print("model loaded")
 except ValueError:
     model = AlexNet((227, 227, 3), num_classes)
@@ -98,7 +98,6 @@ def train():
             # EDITED BY LI YUYANG
             # save the model to the file
             tf.saved_model.save(model, checkpoint_path)
-            # model.save('saved_model/my_model')
             print("Model saved")
 
 
